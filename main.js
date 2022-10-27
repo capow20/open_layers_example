@@ -21,10 +21,34 @@ const map = new Map({
     new ImageLayer({
       source: new Static({
         attributions: '© <a href="https://xkcd.com/license.html">xkcd</a>',
+        url: 'assets/three.png',
+        projection: new Projection({
+          units: 'pixels',
+          extent: [0,0, extent[2] / 6, extent[3] / 6],
+        }),
+        imageExtent: [0,0, extent[2] / 6, extent[3] / 6],
+      }),
+    }),
+    new ImageLayer({
+      source: new Static({
+        attributions: '© <a href="https://xkcd.com/license.html">xkcd</a>',
         url: 'assets/two.jpg',
+        projection: new Projection({
+          units: 'pixels',
+          extent: [0,0, extent[2] / 2, extent[3] / 2],
+        }),
+        imageExtent: [0,0, extent[2] / 2, extent[3] / 2],
+      }),
+      maxZoom: 5
+    }),
+    new ImageLayer({
+      source: new Static({
+        attributions: '© <a href="https://xkcd.com/license.html">xkcd</a>',
+        url: 'assets/one.png',
         projection: projection,
         imageExtent: extent,
       }),
+      maxZoom: 3,
     }),
   ],
   target: 'map',
