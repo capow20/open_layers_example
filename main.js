@@ -4,6 +4,7 @@ import Projection from 'ol/proj/Projection';
 import Static from 'ol/source/ImageStatic';
 import View from 'ol/View';
 import {getCenter} from 'ol/extent';
+import './style.css'
 
 // Map views always need a projection.  Here we just want to map image
 // coordinates directly to map coordinates, so we create a projection that uses
@@ -20,7 +21,7 @@ const map = new Map({
     new ImageLayer({
       source: new Static({
         attributions: '© <a href="https://xkcd.com/license.html">xkcd</a>',
-        url: 'https://imgs.xkcd.com/comics/online_communities.png',
+        url: 'assets/two.jpg',
         projection: projection,
         imageExtent: extent,
       }),
