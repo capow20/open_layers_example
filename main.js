@@ -1,17 +1,36 @@
-import './style.css';
-import {Map, View} from 'ol';
-import TileLayer from 'ol/layer/Tile';
-import OSM from 'ol/source/OSM';
+import ImageLayer from 'ol/layer/Image';
+import Map from 'ol/Map';
+import Projection from 'ol/proj/Projection';
+import Static from 'ol/source/ImageStatic';
+import View from 'ol/View';
+import {getCenter} from 'ol/extent';
+
+// Map views always need a projection.  Here we just want to map image
+// coordinates directly to map coordinates, so we create a projection that uses
+// the image extent in pixels.
+const extent = [0, 0, 1024, 968];
+const projection = new Projection({
+  code: 'xkcd-image',
+  units: 'pixels',
+  extent: extent,
+});
 
 const map = new Map({
-  target: 'map',
   layers: [
-    new TileLayer({
-      source: new OSM()
-    })
+    new ImageLayer({
+      source: new Static({
+        attributions: '© <a href="https://xkcd.com/license.html">xkcd</a>',
+        url: 'https://imgs.xkcd.com/comics/online_communities.png',
+        projection: projection,
+        imageExtent: extent,
+      }),
+    }),
   ],
+  target: 'map',
   view: new View({
-    center: [0, 0],
-    zoom: 2
-  })
+    projection: projection,
+    center: getCenter(extent),
+    zoom: 2,
+    maxZoom: 8,
+  }),
 });
