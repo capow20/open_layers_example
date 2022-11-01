@@ -1,94 +1,109 @@
-import ImageLayer from 'ol/layer/Image';
 import Map from 'ol/Map';
-import Projection from 'ol/proj/Projection';
-import Static from 'ol/source/ImageStatic';
 import View from 'ol/View';
-import {getCenter} from 'ol/extent';
-import './style.css'
-import MousePosition from 'ol/control/MousePosition';
-import * as coordinate from 'ol/coordinate';
+import './style.css';
+import TileLayer from 'ol/layer/Tile';
+import Zoomify from 'ol/source/Zoomify';
+import {FullScreen } from 'ol/control';
 
-// Map views always need a projection.  Here we just want to map image
-// coordinates directly to map coordinates, so we create a projection that uses
-// the image extent in pixels.
-const extent = [0, 0, 1024, 968];
-const projection = new Projection({
-  code: 'xkcd-image',
-  units: 'pixels',
-  extent: extent,
+const imgWidth = 6132;
+const imgHeight = 8176;
+
+let extent = [0, -imgHeight, imgWidth, 0];
+
+let zoomifyUrlOne = 'assets/tiled_one/';
+let zoomifyUrlTwo = 'assets/tiled_two/';
+let zoomifyUrlThree = 'assets/tiled_three/';
+
+let source = new Zoomify({
+  url: zoomifyUrlOne,
+  size: [imgWidth, imgHeight],
+  crossOrigin: 'anonymous',
+  zDirection: -1,
 });
-var currZoom = 1;
-const secondExtent = [(extent[0] + extent[2] / 4),(extent[0] + extent[3] / 4),(extent[2] - extent[2] / 4),(extent[3] - extent[3] / 4)];
-const thirdExtent = [(secondExtent[0] + secondExtent[2] / 4),(secondExtent[0] + secondExtent[3] / 4),(secondExtent[2] - secondExtent[2] / 4),(secondExtent[3] - secondExtent[3] / 4)];
+
+let layer = new TileLayer({
+  tileSize: 256,
+  source: source,
+});
 
 const map = new Map({
-  layers: [
-    new ImageLayer({
-      source: new Static({
-        attributions: '© <a href="https://xkcd.com/license.html">xkcd</a>',
-        url: 'assets/three.png',
-        projection: new Projection({
-          units: 'pixels',
-          extent: thirdExtent,
-        }),
-        imageExtent: thirdExtent,
-      }),
-    }),
-    new ImageLayer({
-      source: new Static({
-        attributions: '© <a href="https://xkcd.com/license.html">xkcd</a>',
-        url: 'assets/two.jpg',
-        projection: new Projection({
-          units: 'pixels',
-          extent: secondExtent,
-        }),
-        imageExtent: secondExtent,
-      }),
-      maxZoom: 3
-    }),
-    new ImageLayer({
-      source: new Static({
-        attributions: '© <a href="https://xkcd.com/license.html">xkcd</a>',
-        url: 'assets/one.png',
-        projection: projection,
-        imageExtent: extent,
-      }),
-      maxZoom: 2,
-    }),
+  controls: [
+    new FullScreen(),
   ],
+  layers: [layer],
   target: 'map',
   view: new View({
-    projection: projection,
-    center: getCenter(extent),
-    zoom: 1,
-    extent: [extent[0] - 100, extent[1] - 100, extent[2] + 100, extent[3] + 100],
+    resolutions: layer.getSource().getTileGrid().getResolutions(),
+    extent: extent,
+    constrainOnlyCenter: true,
   }),
 });
+map.getView().fit(extent);
 
-map.on('moveend', function(e) {
-  var newZoom = map.getView().getZoom();
-  if(newZoom > 2 && currZoom < 2){
-    map.setView(new View({
-      extent: [secondExtent[0] - 100, secondExtent[1] - 100, secondExtent[2] + 100, secondExtent[3] + 100],
-      center: getCenter(secondExtent),
-      projection: new Projection({
-        units: 'pixels',
-        extent: [secondExtent[0] - 100, secondExtent[1] - 100, secondExtent[2] + 100, secondExtent[3] + 100],
-      }),
-      zoom: 2.01
-    }));
-  }else if(newZoom > 3 && currZoom < 3){
-    map.setView(new View({
-      extent: [thirdExtent[0] - 100, thirdExtent[1] - 100, thirdExtent[2] + 100, thirdExtent[3] + 100],
-      center: getCenter(thirdExtent),
-      projection: new Projection({
-        units: 'pixels',
-        extent: [thirdExtent[0] - 100, thirdExtent[1] - 100, thirdExtent[2] + 100, thirdExtent[3] + 100],
-      }),
-      zoom: 3.01,
-      maxZoom: 4
-    }));
-  }
 
-  currZoom = newZoom;
-});
+//this method is for debug buttons to swap layers while running in web
+function _buildInfoButton() {
+  let buttonOne = document.createElement('button');
+  buttonOne.innerHTML = '<span>One</span>';
+  buttonOne.id = 'layer-one-button';
+  buttonOne.style = 'margin: 10px; color: white; padding-top: 2px; padding-bottom: 2px: padding-left: 5px; padding-right: 5px;'
+  let buttonTwo = document.createElement('button');
+  buttonTwo.innerHTML = '<span>Two</span>';
+  buttonTwo.id = 'layer-two-button';
+  buttonTwo.style="margin: 10px;";
+  let buttonThree = document.createElement('button');
+  buttonThree.innerHTML = '<span>Three</span>';
+  buttonThree.id = 'layer-three-button';
+  buttonThree.style="margin: 10px;";
+  let zoomButton = document.createElement('button');
+  zoomButton.innerHTML = '<span>Log Zoom</span>';
+  zoomButton.id = 'layer-theee-button';
+  zoomButton.style="margin: 10px;";
+
+  let title = document.createElement('div');
+  title.className = 'image-title-element';
+  title.id = 'image-title-element';
+
+  let element = document.createElement('div');
+  element.id = 'button-container';
+  element.appendChild(buttonOne);
+  element.appendChild(buttonTwo);
+  element.appendChild(buttonThree);
+  element.appendChild(zoomButton);
+  element.appendChild(title);
+
+  buttonOne.addEventListener('click', () => {
+    updateImageMap(zoomifyUrlOne);
+  }, false);
+  buttonTwo.addEventListener('click', () => {
+   updateImageMap(zoomifyUrlTwo);
+  }, false);
+  buttonThree.addEventListener('click', () => {
+    updateImageMap(zoomifyUrlThree);
+  }, false);
+
+  zoomButton.addEventListener('click', () => {
+    console.log(map.getView().getZoom());
+  }, false);
+
+  return element;
+}
+
+function updateImageMap(url) {
+  let source = new Zoomify({
+      url: url,
+      size: [imgWidth, imgHeight]
+  });
+
+  let layer = new TileLayer({
+      source: source
+  });
+  let view = new View({
+    resolutions: layer.getSource().getTileGrid().getResolutions(),
+    extent: extent,
+    constrainOnlyCenter: true,
+  });
+  map.setView(view);
+  map.getLayers().getArray()[0] = layer;
+  map.getView().fit(extent);
+}

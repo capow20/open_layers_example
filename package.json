@@ -10,6 +10,10 @@
     "vite": "^3.0.9"
   },
   "dependencies": {
-    "ol": "latest"
+    "ol": "^7.1.0",
+    "sharp": "^0.31.1",
+    "vips": "^1.0.0",
+    "vite": "^3.0.9",
+    "wasm-vips": "^0.0.3"
   }
 }
