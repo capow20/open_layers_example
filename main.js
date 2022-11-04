@@ -1,34 +1,42 @@
 import Map from 'ol/Map';
 import View from 'ol/View';
 import './style.css';
-import TileLayer from 'ol/layer/Tile';
+import TileLayer from 'ol/layer/WebGLTile';
 import Zoomify from 'ol/source/Zoomify';
-import {FullScreen } from 'ol/control';
+import {Control, FullScreen } from 'ol/control';
+import ImageLayer from 'ol/layer/Image';
+import BaseLayer from 'ol/layer/Base';
+import Raster from 'ol/source/Raster'
+import { getCenter } from 'ol/extent';
 
-const imgWidth = 6132;
-const imgHeight = 8176;
+const imgWidth = 5192;
+const imgHeight = 6489;
+const blue = [0, 255, 255, 1];
 
-let extent = [0, -imgHeight, imgWidth, 0];
+let extent = [0, 0, imgWidth, imgHeight];
 
 let zoomifyUrlOne = 'assets/tiled_one/';
-let zoomifyUrlTwo = 'assets/tiled_two/';
-let zoomifyUrlThree = 'assets/tiled_three/';
+let zoomifyUrlTwo =  'assets/tiled_two/';
+
+let zoomifyUrlThree =  'assets/tiled_three/';
 
 let source = new Zoomify({
+  className: "custom_zoomify",
   url: zoomifyUrlOne,
   size: [imgWidth, imgHeight],
   crossOrigin: 'anonymous',
   zDirection: -1,
 });
-
 let layer = new TileLayer({
   tileSize: 256,
+  className: "custom_tile_layer",
   source: source,
 });
 
 const map = new Map({
   controls: [
     new FullScreen(),
+    new Control({element: _buildInfoButton()})
   ],
   layers: [layer],
   target: 'map',
@@ -90,6 +98,7 @@ function _buildInfoButton() {
 }
 
 function updateImageMap(url) {
+  let curzoom = map.getView().getZoom();
   let source = new Zoomify({
       url: url,
       size: [imgWidth, imgHeight]
@@ -100,10 +109,11 @@ function updateImageMap(url) {
   });
   let view = new View({
     resolutions: layer.getSource().getTileGrid().getResolutions(),
-    extent: extent,
     constrainOnlyCenter: true,
+    zoom: map.getView().getZoom(),
   });
   map.setView(view);
   map.getLayers().getArray()[0] = layer;
   map.getView().fit(extent);
+  map.getView().setZoom(curzoom);
 }
